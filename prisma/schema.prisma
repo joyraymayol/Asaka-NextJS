@@ -1,0 +1,38 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Traccar owns users/devices/geofences via its own REST API and database,
+// which this app never touches directly. Trip is first-party data with no
+// Traccar equivalent. Reference Traccar entities loosely by numeric id only
+// (traccarDeviceId, startedByUserId) -- never duplicate them as FKs here.
+enum TripStatus {
+  ACTIVE
+  COMPLETED
+  DISCARDED
+}
+
+model Trip {
+  id              String     @id @default(cuid())
+  traccarDeviceId Int
+  startedByUserId Int
+  status          TripStatus @default(ACTIVE)
+  startedAt       DateTime
+  endedAt         DateTime?
+  distanceMeters  Float?
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  @@index([traccarDeviceId, status])
+  @@index([startedAt])
+}
