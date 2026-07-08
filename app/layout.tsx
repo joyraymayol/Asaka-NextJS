@@ -4,6 +4,7 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeInit } from "@/components/theme-init";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 const inter = Inter({subsets:['latin'],variable:'--font-sans'});
 
@@ -35,8 +36,10 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <ThemeInit />
-        {children}
-        <Toaster />
+        <TooltipProvider>
+          {children}
+          <Toaster />
+        </TooltipProvider>
       </body>
     </html>
   );
