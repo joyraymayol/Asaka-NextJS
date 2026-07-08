@@ -12,8 +12,10 @@ session can pick up quickly.
   (login/logout/generic fetch), `lib/dal/session.ts` (`verifySession`), `proxy.ts` (optimistic gate), login/logout UI
   with "Asaka" branding.
 - **Phase 2 — Live map**: `/ws/live` relay in `server.ts` (upstream WS to Traccar's `/api/socket`, messages mapped
-  through DTOs before reaching the browser), `react-leaflet` + CARTO Voyager tiles, device markers colored by status,
-  click-to-popup (time/address/speed), live status badge.
+  through DTOs before reaching the browser), `react-leaflet` + MapTiler "bright" tiles (light/dark variants, swapped
+  in from CARTO Voyager for POI/building labels — see `app/(dashboard)/map/live-map.tsx`, needs
+  `NEXT_PUBLIC_MAPTILER_API_KEY` in `.env.local`), device markers colored by status, click-to-popup
+  (time/address/speed), live status badge. Verified in-browser 2026-07-09.
 - **Phase 3 — Admin dashboard**: Users + Devices CRUD (list/create/edit/delete) via `lib/dal/users.ts` /
   `lib/dal/devices.ts`, all writes gated on `session.administrator`, delete requires confirmation dialog, sortable
   columns (TanStack Table), admin nav in the dashboard header.

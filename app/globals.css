@@ -128,3 +128,58 @@
     @apply font-sans;
   }
 }
+
+/* Device markers on the live map (app/(dashboard)/map/device-icon.tsx). Plain
+   CSS, not Tailwind classes, since this markup is injected by Leaflet as a
+   raw HTML string outside Tailwind's static source scanning. */
+.leaflet-div-icon,
+.device-marker-icon {
+  background: transparent;
+  border: none;
+}
+
+.device-marker {
+  position: relative;
+  width: 26px;
+  height: 48px;
+}
+
+.device-marker-label {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  line-height: 16px;
+}
+
+.device-marker-badge {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 9999px;
+  border: 2px solid white;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
+  transition: transform 120ms ease-out;
+}
+
+.device-marker-icon:hover,
+.device-marker-icon-selected {
+  z-index: 10000 !important;
+}
+
+/* 1.6x on the new 26px base lands at the same ~41.6px hovered size the
+   previous 32px-base/1.3x combo produced -- hover size intentionally
+   unchanged, only the resting size shrank. */
+.device-marker-icon:hover .device-marker-badge {
+  transform: translateX(-50%) scale(1.6);
+}
