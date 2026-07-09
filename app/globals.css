@@ -177,6 +177,24 @@
   z-index: 10000 !important;
 }
 
+/* Glides a marker to its new lat/lng instead of snapping -- Leaflet moves
+   this exact element via an inline `transform: translate3d(...)` on every
+   setLatLng() call, so animating that property is enough (see
+   device-marker.tsx for why the icon must stay the same DOM element across
+   position-only updates for this to have anything to animate). Suppressed
+   during any map pan/zoom interaction, since those also reset each marker's
+   pixel position and would otherwise glide-lag behind the tiles rather than
+   track them 1:1.  */
+.device-marker-icon {
+  transition: transform 900ms linear;
+}
+
+body.leaflet-dragging .device-marker-icon,
+.leaflet-pan-anim .device-marker-icon,
+.leaflet-zoom-anim .device-marker-icon {
+  transition: none;
+}
+
 /* 1.6x on the new 26px base lands at the same ~41.6px hovered size the
    previous 32px-base/1.3x combo produced -- hover size intentionally
    unchanged, only the resting size shrank. */

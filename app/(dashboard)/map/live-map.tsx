@@ -2,11 +2,10 @@
 
 import "leaflet/dist/leaflet.css";
 import { useEffect, useMemo, useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, useMap } from "react-leaflet";
 import { useLiveFeed } from "@/lib/hooks/useLiveFeed";
 import type { DeviceDTO, PositionDTO } from "@/lib/traccar/dto";
-import { DevicePopupContent } from "./device-popup-content";
-import { deviceMarkerIcon } from "./device-icon";
+import { DeviceMarker } from "./device-marker";
 
 // MapTiler "bright" (OSM-data-based, same open-source attribution requirement
 // as before): unlike CARTO Voyager, this style actually renders business/
@@ -97,19 +96,14 @@ export function LiveMap({
         <InvalidateSizeOnMount />
         <TileLayer url={isDark ? DARK_TILE_URL : LIGHT_TILE_URL} attribution={ATTRIBUTION} maxZoom={19} />
         {markers.map(({ device, position }) => (
-          <Marker
+          <DeviceMarker
             key={device.id}
-            position={[position.latitude, position.longitude]}
-            icon={deviceMarkerIcon(device, device.id === selectedDeviceId)}
-            eventHandlers={{
-              popupopen: () => setSelectedDeviceId(device.id),
-              popupclose: () => setSelectedDeviceId((current) => (current === device.id ? null : current)),
-            }}
-          >
-            <Popup>
-              <DevicePopupContent device={device} position={position} />
-            </Popup>
-          </Marker>
+            device={device}
+            position={position}
+            isSelected={device.id === selectedDeviceId}
+            onSelect={() => setSelectedDeviceId(device.id)}
+            onDeselect={() => setSelectedDeviceId((current) => (current === device.id ? null : current))}
+          />
         ))}
       </MapContainer>
     </div>
