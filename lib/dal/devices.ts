@@ -1,6 +1,6 @@
 import "server-only";
 import { verifySession } from "@/lib/dal/session";
-import { assertAdministrator } from "@/lib/dal/authz";
+import { assertAdministrator, ForbiddenError } from "@/lib/dal/authz";
 import { traccarFetch } from "@/lib/traccar/client";
 import { toDeviceDto, type DeviceDTO } from "@/lib/traccar/dto";
 import type { TraccarDevice } from "@/lib/traccar/types";
@@ -9,6 +9,14 @@ export async function listDevices(): Promise<DeviceDTO[]> {
   const session = await verifySession();
   const devices = await traccarFetch<TraccarDevice[]>(session.traccarSessionId, "/api/devices");
   return devices.map(toDeviceDto);
+}
+
+// Traccar already filters /api/devices to what the session may see --
+// membership in that list IS the per-device authorization check. Used by
+// trips (lib/dal/trips.ts) and route history (lib/dal/positions.ts).
+export async function assertDeviceVisible(deviceId: number): Promise<void> {
+  const devices = await listDevices();
+  if (!devices.some((d) => d.id === deviceId)) throw new ForbiddenError();
 }
 
 export type DeviceInput = {

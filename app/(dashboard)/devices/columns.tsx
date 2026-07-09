@@ -6,6 +6,7 @@ import { DataTableSortHeader } from "@/components/data-table-sort-header";
 import { DeviceFormDialog } from "./device-form-dialog";
 import { DeleteDeviceButton } from "./delete-device-button";
 import { TripsDialog } from "./trips-dialog";
+import { RouteDialog } from "./route-dialog";
 import type { DeviceDTO } from "@/lib/traccar/dto";
 
 const STATUS_VARIANT = {
@@ -56,13 +57,16 @@ export function getColumns(isAdmin: boolean): ColumnDef<DeviceRow>[] {
       cell: ({ row }) => {
         const device = row.original;
         return (
-          <TripsDialog
-            deviceId={device.id}
-            deviceName={device.name}
-            triggerLabel={
-              device.activeTripCount > 0 ? `${device.activeTripCount} running` : "Trips"
-            }
-          />
+          <div className="flex gap-2">
+            <TripsDialog
+              deviceId={device.id}
+              deviceName={device.name}
+              triggerLabel={
+                device.activeTripCount > 0 ? `${device.activeTripCount} running` : "Trips"
+              }
+            />
+            <RouteDialog deviceId={device.id} deviceName={device.name} />
+          </div>
         );
       },
     },

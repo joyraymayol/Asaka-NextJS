@@ -31,10 +31,26 @@ session can pick up quickly.
   `npm run test`/vitest), `lib/dal/trips.ts` (incremental compute resuming from `lastComputedFixTime`, CAS on
   `updatedAt` against double-counting, lazy invalidation past `TRIP_MAX_AGE_DAYS`), trips server actions, shared
   `TripsDialog`, devices table moved `/admin/devices` → `/devices` (all users; CRUD still admin-only), map popup
-  Trips button. Remaining: verify against a really-moving device in-browser, sanity-check km vs Traccar's own report.
-- [ ] **Phase 5 — Route history**: `lib/dal/positions.ts` now has `listRawRoutePositions()` (raw, server-only, added
-  for trips) — still needs a DTO-mapped range query for the UI, a period selector (Today / Yesterday / This week /
-  custom range, computed server-side), and a route-playback polyline on the map.
+  Trips button.
+  - [ ] **Verify trips against a really-moving vehicle** (blocked 2026-07-09: whole fleet was parked). When one
+    moves: start a named trip from the map popup → let it drive a few minutes → "Update" shows a growing running
+    total → drive-away-and-back accumulates roundtrip distance (not displacement) → Stop → History shows start/end +
+    total km. Sanity-check the km against Traccar's own report for the same window (ours should read slightly lower
+    — drift filtering). Also confirm a parked device's active trip stays at ~0 km after hours, and check `/devices`
+    as a non-admin (only their devices, no CRUD buttons).
+- [ ] **Phase 5 — Route history (implemented 2026-07-10, in-browser verification pending)**: design doc
+  `docs/plans/phase-5-routes.md`. Built: `RouteDialog` (Today / Yesterday / Custom via shadcn calendar +
+  time inputs; period boundaries computed client-side for correct timezone) beside the Trips button in both the
+  devices table and the map popup; `/routes?deviceId&from&to` page (Next 16: `searchParams` is a Promise — await
+  it) drawing the route with a polyline, canvas-rendered clickable position dots, sampled direction arrows
+  (rotated by `course`), and start/end markers — every one popping the device/time/address/speed card.
+  `listRoutePositions()` in the positions DAL clamps to retention and decimates >5k-point windows. Shared map
+  plumbing extracted to `app/(dashboard)/map/map-support.tsx`; `outline` button variant strengthened
+  (base-mira's was invisible — user feedback). Calendar installed per the registry-conflict caution (declined
+  the `button.tsx` overwrite).
+  - [ ] **Verify routes in-browser**: outline buttons readable in table + popup; Today/Yesterday/Custom each
+    draw; calendar disables dates older than 7 days; point/arrow clicks pop details; dark tiles swap; empty
+    period shows the friendly message; back button returns.
 - [ ] **Phase 6 — Geofencing + notifications**: geofence CRUD (`lib/dal/geofences.ts` doesn't exist yet) with
   circle/polygon/polyline drawing (Leaflet.draw, already installed but unused), device↔geofence linking via
   `/api/permissions`, in-app notification center sourced from Traccar's native `geofenceEnter`/`geofenceExit` events

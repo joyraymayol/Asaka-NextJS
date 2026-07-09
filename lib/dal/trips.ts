@@ -2,8 +2,9 @@ import "server-only";
 import { prisma } from "@/lib/prisma";
 import { verifySession } from "@/lib/dal/session";
 import { assertWritable, ForbiddenError } from "@/lib/dal/authz";
-import { listDevices } from "@/lib/dal/devices";
+import { assertDeviceVisible } from "@/lib/dal/devices";
 import { listRawRoutePositions } from "@/lib/dal/positions";
+import { retentionCutoff } from "@/lib/retention";
 import { integrateDistance, type Anchor } from "@/lib/geo/trip-distance";
 import type { Trip } from "@/app/generated/prisma/client";
 import type { SessionPayload } from "@/lib/session";
@@ -13,10 +14,6 @@ import type { SessionPayload } from "@/lib/session";
 // of truth for positions; we only persist trip metadata + the checkpointed
 // distance total.
 
-// Must be <= Traccar's positions retention window: distance is computed from
-// Traccar's stored positions, so any window that predates retention is gone
-// for good and the trip can no longer be computed accurately.
-const TRIP_MAX_AGE_DAYS = Number(process.env.TRIP_MAX_AGE_DAYS) || 7;
 const EXPIRED_REASON =
   "Position history expired before the distance was computed (trip left running past retention).";
 
@@ -49,17 +46,6 @@ function toTripDto(trip: Trip): TripDTO {
     lastComputedFixTime: trip.lastComputedFixTime?.toISOString() ?? null,
     invalidReason: trip.invalidReason,
   };
-}
-
-// Trips are per-device, and Traccar already filters /api/devices to what the
-// session may see -- membership in that list IS the authorization check.
-async function assertDeviceVisible(deviceId: number): Promise<void> {
-  const devices = await listDevices();
-  if (!devices.some((d) => d.id === deviceId)) throw new ForbiddenError();
-}
-
-function retentionCutoff(): Date {
-  return new Date(Date.now() - TRIP_MAX_AGE_DAYS * 24 * 60 * 60 * 1000);
 }
 
 // Lazy invalidation -- no cron: every list/count/advance sweeps ACTIVE trips

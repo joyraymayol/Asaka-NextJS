@@ -244,3 +244,18 @@ body.leaflet-dragging .device-marker-icon,
     animation: none;
   }
 }
+
+/* Route-history direction arrows (app/(dashboard)/routes/route-map.tsx). */
+.route-arrow-svg {
+  transform: rotate(var(--bearing, 0deg));
+  transition: transform 120ms ease-out;
+}
+
+.route-arrow-icon:hover {
+  z-index: 10000 !important;
+}
+
+.route-arrow-icon:hover .route-arrow-svg {
+  /* 20% larger on hover, composed with the existing rotation. */
+  transform: rotate(var(--bearing, 0deg)) scale(1.2);
+}

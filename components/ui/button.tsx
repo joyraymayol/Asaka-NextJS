@@ -9,8 +9,11 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default: "bg-primary text-primary-foreground hover:bg-primary/80",
+        // base-mira ships this with border-border (a ~92%-lightness gray) and
+        // no background, which doesn't read as a button at a glance -- user
+        // feedback. Stronger border + bg/shadow restored from stock shadcn.
         outline:
-          "border-border hover:bg-input/50 hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:bg-input/30",
+          "border-foreground/20 bg-background shadow-xs hover:bg-input/50 hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:bg-input/30",
         secondary:
           "bg-secondary text-secondary-foreground hover:bg-[color-mix(in_oklch,var(--secondary),var(--foreground)_5%)] aria-expanded:bg-secondary aria-expanded:text-secondary-foreground",
         ghost:

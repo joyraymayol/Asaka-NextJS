@@ -1,63 +1,21 @@
 "use client";
 
 import "leaflet/dist/leaflet.css";
-import { useEffect, useMemo, useState } from "react";
-import { MapContainer, TileLayer, useMap } from "react-leaflet";
+import { useMemo, useState } from "react";
+import { MapContainer, TileLayer } from "react-leaflet";
 import { useLiveFeed } from "@/lib/hooks/useLiveFeed";
 import type { DeviceDTO, PositionDTO } from "@/lib/traccar/dto";
 import { DeviceMarker } from "./device-marker";
-
-// MapTiler "bright" (OSM-data-based, same open-source attribution requirement
-// as before): unlike CARTO Voyager, this style actually renders business/
-// building POI name labels at high zoom, not just streets and address
-// numbers -- confirmed by comparing raw tiles from both providers at the same
-// real-world coordinates. "bright" specifically (not "streets", which has the
-// same labels but a much yellower palette, or "basic"/"dataviz"/"positron",
-// which are whiter but drop the POI labels entirely). Requires a free API
-// key (no card): https://cloud.maptiler.com/account/keys/
-const MAPTILER_KEY = process.env.NEXT_PUBLIC_MAPTILER_API_KEY;
-const LIGHT_TILE_URL = `https://api.maptiler.com/maps/bright-v2/256/{z}/{x}/{y}.png?key=${MAPTILER_KEY}`;
-const DARK_TILE_URL = `https://api.maptiler.com/maps/bright-v2-dark/256/{z}/{x}/{y}.png?key=${MAPTILER_KEY}`;
-const ATTRIBUTION =
-  '&copy; <a href="https://www.maptiler.com/copyright/">MapTiler</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
-
-// Mirrors the dark/light state components/theme-toggle.tsx maintains (a
-// plain `.dark` class on <html>, no theme context/provider exists). Watching
-// the class directly here -- rather than adding a shared context -- keeps
-// the tile-layer swap self-contained and reacts to the toggle regardless of
-// where it's triggered from.
-function useIsDarkMode(): boolean {
-  const [isDark, setIsDark] = useState(() => document.documentElement.classList.contains("dark"));
-
-  useEffect(() => {
-    const root = document.documentElement;
-    const observer = new MutationObserver(() => setIsDark(root.classList.contains("dark")));
-    observer.observe(root, { attributes: true, attributeFilter: ["class"] });
-    return () => observer.disconnect();
-  }, []);
-
-  return isDark;
-}
+import {
+  ATTRIBUTION,
+  DARK_TILE_URL,
+  LIGHT_TILE_URL,
+  InvalidateSizeOnMount,
+  useIsDarkMode,
+} from "./map-support";
 
 const DEFAULT_CENTER: [number, number] = [0, 0];
 const DEFAULT_ZOOM = 3;
-
-// react-leaflet mounts MapContainer as soon as its wrapper div exists, which
-// can race a flex/absolute layout that hasn't finished sizing yet, leaving
-// Leaflet's internal size cache stale (classic "blank map" symptom). A
-// ResizeObserver on the container (rather than a window "resize" listener)
-// also catches layout-only size changes with no window resize event, e.g.
-// the dashboard sidebar collapsing/expanding and animating the map's width.
-function InvalidateSizeOnMount() {
-  const map = useMap();
-  useEffect(() => {
-    map.invalidateSize();
-    const observer = new ResizeObserver(() => map.invalidateSize());
-    observer.observe(map.getContainer());
-    return () => observer.disconnect();
-  }, [map]);
-  return null;
-}
 
 export function LiveMap({
   initialDevices,

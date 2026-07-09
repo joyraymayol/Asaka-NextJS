@@ -10,6 +10,7 @@ const TITLES: Record<string, string> = {
   "/map": "Map",
   "/admin/users": "Users",
   "/devices": "Devices",
+  "/routes": "Route",
 }
 
 export function SiteHeader() {
