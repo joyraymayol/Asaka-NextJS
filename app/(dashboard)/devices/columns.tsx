@@ -3,8 +3,7 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 import { DataTableSortHeader } from "@/components/data-table-sort-header";
-import { DeviceFormDialog } from "./device-form-dialog";
-import { DeleteDeviceButton } from "./delete-device-button";
+import { DeviceRowActions } from "./device-row-actions";
 import { TripsDialog } from "./trips-dialog";
 import { RouteDialog } from "./route-dialog";
 import type { DeviceDTO } from "@/lib/traccar/dto";
@@ -58,6 +57,7 @@ export function getColumns(isAdmin: boolean): ColumnDef<DeviceRow>[] {
         const device = row.original;
         return (
           <div className="flex gap-2">
+            <RouteDialog deviceId={device.id} deviceName={device.name} />
             <TripsDialog
               deviceId={device.id}
               deviceName={device.name}
@@ -65,7 +65,6 @@ export function getColumns(isAdmin: boolean): ColumnDef<DeviceRow>[] {
                 device.activeTripCount > 0 ? `${device.activeTripCount} running` : "Trips"
               }
             />
-            <RouteDialog deviceId={device.id} deviceName={device.name} />
           </div>
         );
       },
@@ -77,9 +76,8 @@ export function getColumns(isAdmin: boolean): ColumnDef<DeviceRow>[] {
       id: "actions",
       header: () => <span className="sr-only">Actions</span>,
       cell: ({ row }) => (
-        <div className="flex justify-end gap-2">
-          <DeviceFormDialog device={row.original} />
-          <DeleteDeviceButton id={row.original.id} name={row.original.name} />
+        <div className="flex justify-end">
+          <DeviceRowActions device={row.original} />
         </div>
       ),
     });

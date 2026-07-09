@@ -3,8 +3,7 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 import { DataTableSortHeader } from "@/components/data-table-sort-header";
-import { UserFormDialog } from "./user-form-dialog";
-import { DeleteUserButton } from "./delete-user-button";
+import { UserRowActions } from "./user-row-actions";
 import type { UserDTO } from "@/lib/traccar/dto";
 
 export const columns: ColumnDef<UserDTO>[] = [
@@ -38,9 +37,8 @@ export const columns: ColumnDef<UserDTO>[] = [
     id: "actions",
     header: () => <span className="sr-only">Actions</span>,
     cell: ({ row }) => (
-      <div className="flex justify-end gap-2">
-        <UserFormDialog user={row.original} />
-        <DeleteUserButton id={row.original.id} name={row.original.name} />
+      <div className="flex justify-end">
+        <UserRowActions user={row.original} />
       </div>
     ),
   },

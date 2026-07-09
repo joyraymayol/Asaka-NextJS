@@ -45,15 +45,32 @@ function toFormState(user?: UserDTO): FormState {
   };
 }
 
-export function UserFormDialog({ user }: { user?: UserDTO }) {
-  const [open, setOpen] = useState(false);
+export function UserFormDialog({
+  user,
+  open: openProp,
+  onOpenChange: onOpenChangeProp,
+}: {
+  user?: UserDTO;
+  /**
+   * Controlled mode, for triggering from outside (e.g. RowActionsMenu):
+   * when provided, this dialog has no trigger of its own and opens/closes
+   * only via these props. Omit both for the default self-contained mode
+   * (renders its own trigger button, e.g. the "Add user" button).
+   */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}) {
+  const isControlled = openProp !== undefined;
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = isControlled ? openProp : internalOpen;
   const [form, setForm] = useState<FormState>(() => toFormState(user));
   const [error, setError] = useState<string | undefined>();
   const [isPending, startTransition] = useTransition();
   const isEdit = Boolean(user);
 
   function handleOpenChange(next: boolean) {
-    setOpen(next);
+    if (isControlled) onOpenChangeProp?.(next);
+    else setInternalOpen(next);
     if (next) {
       setForm(toFormState(user));
       setError(undefined);
@@ -83,15 +100,17 @@ export function UserFormDialog({ user }: { user?: UserDTO }) {
         return;
       }
       toast.success(isEdit ? `${form.name} updated` : `${form.name} created`);
-      setOpen(false);
+      handleOpenChange(false);
     });
   }
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger render={<Button variant={isEdit ? "outline" : "default"} size={isEdit ? "sm" : "default"} />}>
-        {isEdit ? "Edit" : "Add user"}
-      </DialogTrigger>
+      {!isControlled && (
+        <DialogTrigger render={<Button variant={isEdit ? "outline" : "default"} size={isEdit ? "sm" : "default"} />}>
+          {isEdit ? "Edit" : "Add user"}
+        </DialogTrigger>
+      )}
       <DialogContent>
         <form onSubmit={handleSubmit}>
           <DialogHeader>

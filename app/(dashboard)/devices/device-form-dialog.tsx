@@ -35,15 +35,32 @@ function toFormState(device?: DeviceDTO): FormState {
   };
 }
 
-export function DeviceFormDialog({ device }: { device?: DeviceDTO }) {
-  const [open, setOpen] = useState(false);
+export function DeviceFormDialog({
+  device,
+  open: openProp,
+  onOpenChange: onOpenChangeProp,
+}: {
+  device?: DeviceDTO;
+  /**
+   * Controlled mode, for triggering from outside (e.g. RowActionsMenu):
+   * when provided, this dialog has no trigger of its own and opens/closes
+   * only via these props. Omit both for the default self-contained mode
+   * (renders its own trigger button, e.g. the "Add device" button).
+   */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}) {
+  const isControlled = openProp !== undefined;
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = isControlled ? openProp : internalOpen;
   const [form, setForm] = useState<FormState>(() => toFormState(device));
   const [error, setError] = useState<string | undefined>();
   const [isPending, startTransition] = useTransition();
   const isEdit = Boolean(device);
 
   function handleOpenChange(next: boolean) {
-    setOpen(next);
+    if (isControlled) onOpenChangeProp?.(next);
+    else setInternalOpen(next);
     if (next) {
       setForm(toFormState(device));
       setError(undefined);
@@ -68,15 +85,17 @@ export function DeviceFormDialog({ device }: { device?: DeviceDTO }) {
         return;
       }
       toast.success(isEdit ? `${form.name} updated` : `${form.name} created`);
-      setOpen(false);
+      handleOpenChange(false);
     });
   }
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger render={<Button variant={isEdit ? "outline" : "default"} size={isEdit ? "sm" : "default"} />}>
-        {isEdit ? "Edit" : "Add device"}
-      </DialogTrigger>
+      {!isControlled && (
+        <DialogTrigger render={<Button variant={isEdit ? "outline" : "default"} size={isEdit ? "sm" : "default"} />}>
+          {isEdit ? "Edit" : "Add device"}
+        </DialogTrigger>
+      )}
       <DialogContent>
         <form onSubmit={handleSubmit}>
           <DialogHeader>
