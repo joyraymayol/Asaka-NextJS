@@ -183,3 +183,46 @@
 .device-marker-icon:hover .device-marker-badge {
   transform: translateX(-50%) scale(1.6);
 }
+
+/* Login page background (app/(auth)/login/auth-background.tsx): a network of
+   pulsing dots and flowing route lines. transform-box/transform-origin let
+   circles scale from their own center rather than the SVG's (0,0) origin. */
+.auth-bg-dot {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation-name: auth-dot-pulse;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+.auth-bg-line {
+  stroke-dasharray: 5 12;
+  animation-name: auth-line-flow;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+@keyframes auth-dot-pulse {
+  0%,
+  100% {
+    opacity: 0.15;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.2);
+  }
+}
+
+@keyframes auth-line-flow {
+  to {
+    stroke-dashoffset: -204;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-bg-dot,
+  .auth-bg-line {
+    animation: none;
+  }
+}
