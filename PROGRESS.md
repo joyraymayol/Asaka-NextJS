@@ -60,9 +60,15 @@ session can pick up quickly.
   when handling an expired Traccar session (401) from `lib/traccar/client.ts::traccarFetch`, which can be called
   from a Server Component's data fetch. Fixed by redirecting to `app/api/session/expire/route.ts` (a Route Handler)
   to clear the cookie, rather than trying to clear it inline.
-- **If `/ws/live` flaps between "Live" and "Reconnecting…"**: check for HTTP 503 on the upstream WS handshake in the
-  server log (`[ws/live] upstream handshake rejected: HTTP ...`) — this was a reverse-proxy-in-front-of-Traccar not
-  forwarding WebSocket upgrade headers, not a bug in this app.
+- **If `/ws/live` shows "Live" but markers never move**: previously misdiagnosed here as a reverse-proxy not
+  forwarding WebSocket upgrade headers — it wasn't. The real bug (fixed): `session.traccarSessionId` is already the
+  full `"JSESSIONID=<value>"` cookie pair (see `extractSessionCookie` in `lib/traccar/client.ts`), but `server.ts`'s
+  upstream WS connection re-prefixed it into `Cookie: JSESSIONID=JSESSIONID=<value>`, which Traccar's Jetty server
+  can't match to any session, so it unconditionally rejected the WS upgrade with HTTP 503 on every attempt (confirmed
+  via a direct `curl` probe of `/api/socket` — no proxy in the response, straight from Jetty). Also fixed in the same
+  pass: the `unexpected-response` handler wasn't closing the browser-side socket on a rejected handshake, so the
+  client's "Live" badge stayed green forever with zero data and no reconnect ever firing — check server logs for
+  `[ws/live] upstream handshake rejected: HTTP ...` if this regresses.
 
 ## Environment
 

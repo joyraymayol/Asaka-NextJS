@@ -63,8 +63,14 @@ app.prepare().then(() => {
       // upstream connection per Traccar session across multiple tabs is a
       // clean future optimization, not needed at this scale.
       const wsUrl = getTraccarWsUrl();
+      // traccarSessionId is already the full "JSESSIONID=<value>" cookie pair
+      // (see extractSessionCookie in lib/traccar/client.ts) -- forward it
+      // verbatim, same as traccarFetch/traccarLogout do. Re-prefixing it here
+      // produced "JSESSIONID=JSESSIONID=<value>", a cookie Traccar's Jetty
+      // server can't match to any session, which is why the WS upgrade was
+      // unconditionally rejected with 503 on every attempt.
       const upstream = new WebSocket(wsUrl, {
-        headers: { Cookie: `JSESSIONID=${session.traccarSessionId}` },
+        headers: { Cookie: session.traccarSessionId },
       });
 
       upstream.on("open", () => {
@@ -72,6 +78,13 @@ app.prepare().then(() => {
       });
       upstream.on("unexpected-response", (_req, res) => {
         console.error(`[ws/live] upstream handshake rejected: HTTP ${res.statusCode}`);
+        // Unlike "error"/"close", "unexpected-response" doesn't tear down the
+        // socket on its own -- without this, a rejected upstream handshake
+        // (e.g. a flaky reverse proxy in front of Traccar, see PROGRESS.md)
+        // leaves the browser socket open and the client's "Live" badge green
+        // forever, with no data ever arriving and no reconnect ever firing.
+        res.destroy();
+        browserSocket.close();
       });
       upstream.on("message", (data) => {
         if (browserSocket.readyState !== WebSocket.OPEN) return;
