@@ -24,18 +24,22 @@ session can pick up quickly.
 
 ## Pending — pick up here next
 
-- [ ] **Phase 4 — Geofencing + notifications**: geofence CRUD (`lib/dal/geofences.ts` doesn't exist yet) with
+- [ ] **Phase 4 — Trips (implemented 2026-07-09, in-browser verification pending)**: manually started/stopped named
+  trips, multiple concurrent per device, checkpointed path-integrated distance. Full design doc:
+  `docs/plans/phase-4-trips.md`. Built: first Prisma migration (`prisma/migrations/`), `lib/geo/`
+  (haversine + `integrateDistance` noise filter — anchor gating, doppler-speed gate, teleport guard; unit-tested via
+  `npm run test`/vitest), `lib/dal/trips.ts` (incremental compute resuming from `lastComputedFixTime`, CAS on
+  `updatedAt` against double-counting, lazy invalidation past `TRIP_MAX_AGE_DAYS`), trips server actions, shared
+  `TripsDialog`, devices table moved `/admin/devices` → `/devices` (all users; CRUD still admin-only), map popup
+  Trips button. Remaining: verify against a really-moving device in-browser, sanity-check km vs Traccar's own report.
+- [ ] **Phase 5 — Route history**: `lib/dal/positions.ts` now has `listRawRoutePositions()` (raw, server-only, added
+  for trips) — still needs a DTO-mapped range query for the UI, a period selector (Today / Yesterday / This week /
+  custom range, computed server-side), and a route-playback polyline on the map.
+- [ ] **Phase 6 — Geofencing + notifications**: geofence CRUD (`lib/dal/geofences.ts` doesn't exist yet) with
   circle/polygon/polyline drawing (Leaflet.draw, already installed but unused), device↔geofence linking via
   `/api/permissions`, in-app notification center sourced from Traccar's native `geofenceEnter`/`geofenceExit` events
   (extend the `/ws/live` relay's `toLiveFeedMessage` in `lib/traccar/dto.ts` to also map an `events` array — currently
   dropped on purpose until this phase).
-- [ ] **Phase 5 — Route history**: `lib/dal/positions.ts` only has `listLatestPositions()` today; needs a
-  range-query variant (`/api/positions` or `/api/reports/route` with `from`/`to`), a period selector (Today /
-  Yesterday / This week / custom range, computed server-side), and a route-playback polyline on the map.
-- [ ] **Phase 6 — Trips**: `Trip` model already exists in `prisma/schema.prisma` (untouched since scaffolding — no
-  migration run yet, no `lib/dal/trips.ts`). Needs: start/stop Server Actions, the path-integrated Haversine distance
-  algorithm (`lib/geo/haversine.ts` doesn't exist yet) with noise filtering for parked-GPS-drift, and UI controls on
-  the device popup/map.
 
 ## Known gotchas hit during this build (don't re-discover these)
 

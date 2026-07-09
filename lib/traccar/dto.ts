@@ -94,7 +94,7 @@ export type LiveFeedMessage = {
 // Applied to every /ws/live relay frame (see server.ts) so the raw Traccar
 // feed -- which includes attributes/network/protocol -- never reaches the
 // browser, same as the REST-backed DAL calls above. Events are dropped here
-// until Phase 4 adds an EventDTO for geofence notifications.
+// until Phase 6 adds an EventDTO for geofence notifications.
 export function toLiveFeedMessage(raw: TraccarWsMessage): LiveFeedMessage {
   const message: LiveFeedMessage = {};
   if (raw.devices) message.devices = raw.devices.map(toDeviceDto);

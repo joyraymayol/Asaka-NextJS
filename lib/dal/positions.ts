@@ -11,3 +11,20 @@ export async function listLatestPositions(): Promise<PositionDTO[]> {
   const positions = await traccarFetch<TraccarPosition[]>(session.traccarSessionId, "/api/positions");
   return positions.map(toPositionDto);
 }
+
+// Historical route window for one device, RAW (not DTO-mapped): trip distance
+// integration (lib/dal/trips.ts) needs `valid`/`accuracy`/`speed`, which
+// PositionDTO strips. Server-only by module guard above -- raw positions must
+// never cross the Server/Client Component boundary. Traccar returns them
+// sorted by fixTime ascending. Callers authorize device visibility first;
+// Traccar additionally 4xxes if the session can't see the device.
+export async function listRawRoutePositions(
+  traccarSessionId: string,
+  deviceId: number,
+  from: Date,
+  to: Date,
+): Promise<TraccarPosition[]> {
+  return traccarFetch<TraccarPosition[]>(traccarSessionId, "/api/positions", {
+    searchParams: { deviceId, from: from.toISOString(), to: to.toISOString() },
+  });
+}

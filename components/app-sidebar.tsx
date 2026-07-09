@@ -26,12 +26,8 @@ export function AppSidebar({
 } & React.ComponentProps<typeof Sidebar>) {
   const navMain = [
     { title: "Map", url: "/map", icon: <MapIcon /> },
-    ...(user.administrator
-      ? [
-          { title: "Users", url: "/admin/users", icon: <UsersIcon /> },
-          { title: "Devices", url: "/admin/devices", icon: <RadioIcon /> },
-        ]
-      : []),
+    { title: "Devices", url: "/devices", icon: <RadioIcon /> },
+    ...(user.administrator ? [{ title: "Users", url: "/admin/users", icon: <UsersIcon /> }] : []),
   ]
 
   return (

@@ -26,12 +26,27 @@ model Trip {
   id              String     @id @default(cuid())
   traccarDeviceId Int
   startedByUserId Int
+  name            String
   status          TripStatus @default(ACTIVE)
   startedAt       DateTime
   endedAt         DateTime?
-  distanceMeters  Float?
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
+  // Persisted running total, advanced incrementally: each distance
+  // computation resumes from lastComputedFixTime instead of re-reading the
+  // whole trip, so a long trip stays computable as long as it's refreshed
+  // at least once within Traccar's positions-retention window.
+  distanceMeters      Float     @default(0)
+  // fixTime of the last *processed* raw position (resume point for the next
+  // incremental compute -- includes positions the noise filter rejected).
+  lastComputedFixTime DateTime?
+  // Noise-filter anchor: the last *accepted* point. Kept separately from the
+  // resume point so parked-GPS-drift gating stays exact across checkpoints.
+  lastAcceptedLat     Float?
+  lastAcceptedLon     Float?
+  // Set when status becomes DISCARDED (e.g. position history expired before
+  // the distance was computed -- a trip someone forgot to stop).
+  invalidReason       String?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
 
   @@index([traccarDeviceId, status])
   @@index([startedAt])

@@ -9,7 +9,7 @@ import { ThemeToggle } from "@/components/theme-toggle"
 const TITLES: Record<string, string> = {
   "/map": "Map",
   "/admin/users": "Users",
-  "/admin/devices": "Devices",
+  "/devices": "Devices",
 }
 
 export function SiteHeader() {
