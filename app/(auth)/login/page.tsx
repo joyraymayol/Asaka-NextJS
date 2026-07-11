@@ -19,12 +19,12 @@ export default function LoginPage() {
       <div className="relative z-10 flex w-full max-w-sm flex-col items-center gap-6">
         <div className="flex flex-col items-center gap-1 text-center">
           <span className="text-2xl font-semibold tracking-tight">Asaka</span>
-          <span className="text-xs text-muted-foreground">Fleet tracking, live.</span>
+          <span className="text-xs text-muted-foreground">GPS fleet tracking</span>
         </div>
         <Card className="w-full border border-border/60 bg-card/80 shadow-xl shadow-foreground/5 backdrop-blur-md">
           <CardHeader>
             <CardTitle>Sign in</CardTitle>
-            <CardDescription>Use your existing fleet tracking account.</CardDescription>
+            <CardDescription>Use your existing Asaka account.</CardDescription>
           </CardHeader>
           <CardContent>
             <LoginForm />
