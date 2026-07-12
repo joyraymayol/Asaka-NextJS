@@ -9,5 +9,5 @@ import { getColumns, type DeviceRow } from "./columns";
 // boundary, never the column defs themselves.
 export function DevicesTable({ data, isAdmin }: { data: DeviceRow[]; isAdmin: boolean }) {
   const columns = useMemo(() => getColumns(isAdmin), [isAdmin]);
-  return <DataTable columns={columns} data={data} />;
+  return <DataTable columns={columns} data={data} searchPlaceholder="Search devices..." />;
 }

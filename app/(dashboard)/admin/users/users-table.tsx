@@ -12,5 +12,5 @@ import type { UserDTO } from "@/lib/traccar/dto";
 // for a dynamic route). Importing columns.tsx directly in this already-client
 // module sidesteps the question entirely.
 export function UsersTable({ data }: { data: UserDTO[] }) {
-  return <DataTable columns={columns} data={data} />;
+  return <DataTable columns={columns} data={data} searchPlaceholder="Search users..." />;
 }
